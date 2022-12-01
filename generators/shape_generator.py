@@ -36,6 +36,20 @@ class Vector3D:
         dz = self.z - v2.z;
         return dx ** 2 + dy ** 2 + dz ** 2;
 
+        
+
+    def toPolar2D(self):
+        if self.y == 0:
+            return Polar2D(
+                    math.sqrt(self.x ** 2 + self.y ** 2),
+                    0 if self.x > 0 else math.pi,
+                    self.z)
+        return Polar2D(
+            math.sqrt(self.x ** 2 + self.y ** 2),
+            math.atan(self.y/self.x),
+            self.z)
+
+
 # CONSTANTS
 ZERO_RVECTOR = Vector3D(0,0,0, True)
 ZERO_VECTOR = Vector3D(0,0,0, False)
@@ -200,7 +214,10 @@ class Pattern:
         ext_angle = 2 * math.pi / sides;
         v = Polar2D(radius, offset_rot)
         for i in range(sides):
-            self.generateLine(centre.addVector(v.toVector3D()), v.RotateRadians(ext_angle).toVector3D(), density, particle_type, players, relative);
+            old_centre_offset = self.centre_offset
+            self.centre_offset = v.toVector3D().addVector(old_centre_offset)
+            self.generateLine(centre.addVector(v.toVector3D()).addVector(old_centre_offset), v.RotateRadians(ext_angle).toVector3D().addVector(old_centre_offset), density, particle_type, players, relative);
+            self.centre_offset = old_centre_offset
 
         # add decorations in the polygon vertices
         v = Polar2D(radius, offset_rot)
@@ -208,7 +225,7 @@ class Pattern:
             v.RotateRadians(ext_angle)
             for pattern in vertex_decoration:
                 old_centre_offset = self.centre_offset
-                self.centre_offset = v.toVector3D()
+                self.centre_offset = v.toVector3D().addVector(old_centre_offset)
                 pattern()
                 self.centre_offset = old_centre_offset
 
