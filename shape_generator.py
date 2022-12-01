@@ -114,17 +114,23 @@ class Pattern:
         self.players = players;
         self.pattern = pattern;
     
-    def getOutput(self):
+    def getOutput(self, print_particle_count=False):
         out = "";
+        count = 0;
         for i in self.pattern:
             if i.disabled:
                 pass
             elif i.particle_type != "":
                 out += i.getCommand() + "\n";
+                count += 1;
             else:
                 j = i;
                 j.particle_type = self.default_particle_type;
                 out += j.getCommand() + "\n";
+                count += 1;
+
+        if print_particle_count:
+            print("Number of Particles:", count)
         return out;
 
     def addParticle(self, particle: Particle):
@@ -227,13 +233,13 @@ if __name__ == "__main__":
         offset_rot = 0,
         particle_type = "",
         vertex_decoration = [
-            lambda: my_pattern.generateCircle(1, Vector3D(0,0,0,True), 5, "", "", True, erase=True)
+            lambda: my_pattern.generateCircle(1.3, Vector3D(0,0,0,True), 5, "", "", True, erase=True),
+            lambda: my_pattern.generateCircle(0.9, Vector3D(0,0,0,True), 5, "", "", True, erase=True),
         ]
     )
 
-    output = my_pattern.getOutput();
+    output = my_pattern.getOutput(True);
     
-    print("Number of Particles:", len(my_pattern.pattern))
     pyperclip.copy(output)
 
 
