@@ -1,6 +1,6 @@
 import math
 import pyperclip
-
+import copy
 
 class Vector3D:
     x = 0;
@@ -110,7 +110,7 @@ class Particle:
         self.player = player
 
     def getCommand(self):
-        return f"particle {self.particle_type} {self.origin.toString()} {self.size.toString()} {self.speed} {self.count}";
+        return f"particle {self.particle_type} {self.origin.toString()} {self.size.toString()} {self.speed} {self.count} {self.mode} {self.player}";
 
 
 
@@ -119,14 +119,16 @@ class Particle:
 class Pattern:
     default_particle_type = "";
     players = "@a"
+    mode = "normal"
     pattern = [Particle("", Vector3D(0, 0, 0, True), Vector3D(0,0,0), 0, 1)];
 
     centre_offset = Vector3D(0,0,0, True);
 
-    def __init__(self, default_particle_type="minecraft:happy_villager", players = "@a", pattern=[]):
+    def __init__(self, default_particle_type="minecraft:happy_villager", players = "@a", pattern=[], mode="force"):
         self.default_particle_type = default_particle_type;
         self.players = players;
         self.pattern = pattern;
+        self.mode = mode;
     
     def getOutput(self, print_particle_count=False):
         out = "";
@@ -173,7 +175,7 @@ class Pattern:
             self.eraseRadius(centre, radius, "");
 
         for i in range(math.ceil(particle_count)):
-            self.pattern.append(Particle(particle_type, centre.addVector(Polar2D(radius, i / particle_count * 2 * math.pi).toVector3D()), Vector3D(0, 0, 0, False), 0, 1, "normal", players));
+            self.pattern.append(Particle(particle_type, centre.addVector(Polar2D(radius, i / particle_count * 2 * math.pi).toVector3D()), Vector3D(0, 0, 0, False), 0, 1, self.mode, players));
 
     def generateLine(self, origin: Vector3D, destination: Vector3D, density: float, particle_type=default_particle_type, players=players, relative=True):
         particle_count = math.sqrt(origin.getSqrDistance(destination)) * density;
@@ -197,7 +199,7 @@ class Pattern:
                         True
                     ),
                     Vector3D(0,0,0),
-                    0, 1, "normal", players
+                    0, 1, self.mode, players
                 )
             );
     
@@ -224,11 +226,49 @@ class Pattern:
         for i in range(sides):
             v.RotateRadians(ext_angle)
             for pattern in vertex_decoration:
-                old_centre_offset = self.centre_offset
-                self.centre_offset = v.toVector3D().addVector(old_centre_offset)
-                pattern()
-                self.centre_offset = old_centre_offset
+                if type(pattern) == Pattern:
+                    print("Pattern Found")
 
+                    calc_pattern = copy.deepcopy(pattern.pattern)
+
+                    print(calc_pattern[-1].origin.x)
+                    for particle in calc_pattern:
+                        particle.origin = particle.origin.addVector(Polar2D(radius, offset_rot).toVector3D()).toPolar2D().RotateRadians((i + 1) * ext_angle).toVector3D();
+                        self.pattern.append(particle)
+                    print(calc_pattern[-1].origin.x)
+                else:
+                    old_centre_offset = self.centre_offset
+                    self.centre_offset = v.toVector3D().addVector(old_centre_offset)
+                    pattern()
+                    self.centre_offset = old_centre_offset
+    
+    def generateStar(self, centre: Vector3D, radius: float, vertices: int, step: int, density: float, offset_rot = 0, particle_type=default_particle_type, players=players, relative=True):
+        if vertices < 3:
+            return ValueError(f"Vertices is expected to be larger than 2, received {vertices} instead.");
+        if step < 0 or step > vertices:
+            return ValueError(f"Step should be within 0 < step < vertices, received {step} instead.");
+        
+
+        ext_angle = 2 * math.pi / vertices;
+        vertex_points = [Polar2D(radius, offset_rot + i * ext_angle).toVector3D().addVector(centre) for i in range(vertices)]
+
+        points_left = vertices
+        while points_left > 0:
+            u = 0
+            while True:
+                v = (u + step) % vertices
+                self.generateLine(vertex_points[u], vertex_points[v], density, particle_type, players, relative);
+                points_left -= 1
+                u = v
+                if u == 0:
+                    break;
+            u += 1
+            
+        
+            
+
+
+        
 
 
 
