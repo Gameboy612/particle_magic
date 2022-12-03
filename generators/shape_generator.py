@@ -279,12 +279,6 @@ class Pattern:
         
             
 
-class Blueprint:
-    def generate():
-        pass
-
-        
-
 
 
 

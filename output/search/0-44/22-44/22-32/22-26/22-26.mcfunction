@@ -1,0 +1,2 @@
+execute if score #temp Stats.temp matches 22..23 run function particle:animated_array/search/0-44/22-44/22-32/22-26/22-23/22-23
+execute if score #temp Stats.temp matches 24..26 run function particle:animated_array/search/0-44/22-44/22-32/22-26/24-26/24-26
