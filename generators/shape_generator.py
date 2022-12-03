@@ -96,7 +96,16 @@ class Particle:
 
     disabled = False
 
-    def __init__(self, particle_type: str, origin: Vector3D, size: Vector3D, speed: float, count: int, mode="normal", player="@a"):
+    _EraseRadius = 0.0
+    _filter_particle_type = ""
+
+    def __init__(self, particle_type="", origin = Vector3D(0,0,0, True), size = Vector3D(0,0,0), speed= 0.0, count=1, mode="normal", player="@a", _EraseRadius=0.0, filter_particle_type=""):
+        if _EraseRadius != 0.0:
+            self.disabled = True
+            self.origin = origin
+            self._filter_particle_type = filter_particle_type
+            self._EraseRadius = _EraseRadius
+            return
         if count <= 0:
             return ValueError(f'Particle Error: Particle count is less than 1 (expected positive input, but received {count}');
         if speed < 0:
@@ -133,6 +142,16 @@ class Pattern:
     def getOutput(self, print_particle_count=False):
         out = "";
         count = 0;
+
+        # New Erase Function :D:D:D
+        for i in range(len(self.pattern)):
+            if self.pattern[i]._EraseRadius > 0:
+                eraser = self.pattern[i]
+                for curr_particle in self.pattern[:i]:
+                    if eraser._filter_particle_type == "" or eraser._filter_particle_type != curr_particle.particle_type:
+                        if curr_particle.origin.getSqrDistance(eraser.origin) < eraser._EraseRadius ** 2:
+                            curr_particle.disabled = True;
+
         for i in self.pattern:
             if i.disabled:
                 pass
@@ -152,14 +171,6 @@ class Pattern:
     def addParticle(self, particle: Particle):
         self.pattern.append(particle);
 
-    def eraseRadius(self, centre, radius, filter_particle_type=""):
-        i = 0;
-        while i < len(self.pattern):
-            if filter_particle_type == "" or filter_particle_type != self.pattern[i].particle_type:
-                if self.pattern[i].origin.getSqrDistance(centre) < radius ** 2:
-                    self.pattern[i].disabled = True;
-            i += 1;
-            
 
     def generateCircle(self, radius: Vector3D, centre: Vector3D, density: float, particle_type=default_particle_type, players=players, relative=True, erase=False):
         centre = centre.addVector(self.centre_offset)
@@ -172,7 +183,8 @@ class Pattern:
             players = self.players;
 
         if erase:
-            self.eraseRadius(centre, radius, "");
+            self.pattern.append(Particle(origin=centre, _EraseRadius=radius))
+            
 
         for i in range(math.ceil(particle_count)):
             self.pattern.append(Particle(particle_type, centre.addVector(Polar2D(radius, i / particle_count * 2 * math.pi).toVector3D()), Vector3D(0, 0, 0, False), 0, 1, self.mode, players));
@@ -267,6 +279,9 @@ class Pattern:
         
             
 
+class Blueprint:
+    def generate():
+        pass
 
         
 
