@@ -1,0 +1,2 @@
+execute if score #temp Stats.temp matches 25 run function item_register:container_manager/click_event/particles/25
+execute if score #temp Stats.temp matches 26 run function item_register:container_manager/click_event/particles/26

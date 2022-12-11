@@ -1,10 +1,5 @@
 import os
 import shutil
-import numpy
-
-from generators.shape_generator import *
-from generators.math_tools import *
-
 
 def clear_output():
     CURR_DIR = os.path.dirname(__file__)
@@ -20,69 +15,7 @@ def clear_output():
 
 OUTPUT_DIR = clear_output()
 
-
-DENSITY = 3
-file_index = 0
-for t in [round(i, 2) for i in numpy.arange(0.5, 5.00, 0.05).tolist()]:
-
-    RADIUS = 10 * t
-    
-
-    circle = Pattern("minecraft:dust 1 0 0 1.2", pattern=[], mode="force");
-    circle.generateCircle(RADIUS * 0.2, ZERO_RVECTOR, DENSITY, erase=True);
-
-
-    geometry = Pattern("minecraft:dust 1 0 0 1.2", pattern=[], mode="force");
-    geometry.generateCircle(RADIUS, ZERO_RVECTOR, DENSITY);
-
-    # geometry.generateStar(
-    #     centre = ZERO_RVECTOR,
-    #     radius = RADIUS,
-    #     vertices = 7,
-    #     step = 2,
-    #     density = DENSITY,
-    #     offset_rot = 0,
-    #     particle_type = ""
-    # )
-
-
-    geometry.generatePolygon(
-        centre = ZERO_RVECTOR,
-        sides = 5,
-        radius = RADIUS,
-        density = DENSITY,
-        offset_rot = 0,
-        particle_type = "",
-        vertex_decoration = [
-            circle
-        ]
-    )
-
-    INNER_RADIUS = findInscribedRadius(RADIUS, 5)
-    geometry.generateCircle(INNER_RADIUS, ZERO_RVECTOR, DENSITY);
-    
-    geometry.generateStar(
-        centre = ZERO_RVECTOR,
-        radius = INNER_RADIUS,
-        vertices = 7,
-        step = 2,
-        density = DENSITY,
-        offset_rot = 0,
-        particle_type = ""
-    )
-
-
-    output = geometry.getOutput(True);
-    
-    f = open(f"{OUTPUT_DIR}/particles/{file_index}.mcfunction", "w")
-    f.write(output)
-    f.close()
-
-
-    file_index += 1
-
-
-
+file_index = int(input("Number of file searches: "))
 
 PARTICLE_RESOURCE_PATH = input("Where is the particle resource path located? (what is the function directory in your datapack?)\n")
 if PARTICLE_RESOURCE_PATH[-1] == '/':

@@ -1,0 +1,2 @@
+execute if score #temp Stats.temp matches 0..5 run function item_register:container_manager/click_event/search/0-12/0-5/0-5
+execute if score #temp Stats.temp matches 6..12 run function item_register:container_manager/click_event/search/0-12/6-12/6-12
